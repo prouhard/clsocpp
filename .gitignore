@@ -1,0 +1,5 @@
+# VSCode config
+.vscode/
+
+# Compiled main
+main
