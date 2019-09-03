@@ -9,14 +9,14 @@ class Matrix
     private:
         unsigned nrows;
         unsigned ncols;
-        std::vector<float> values;
+        std::vector<double> values;
     public:
         Matrix(
             unsigned nrows,
             unsigned ncols,
-            std::vector<float> values
+            std::vector<double> values
         );
-        float& operator() (unsigned row, unsigned col);
+        double& operator() (unsigned row, unsigned col);
         void print();
 };
 

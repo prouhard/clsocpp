@@ -1,14 +1,10 @@
-#include <iostream>
-#include <vector>
+#include "jordanMatrix.h"
 
-#include "matrix.h"
 
 int main()
 {
-    std::vector<float> values = {1, 2, 3, 4};
-    unsigned nrows = 2;
-    unsigned ncols = 2;
-    Matrix matrix(nrows, ncols, values);
+    std::vector<double> values = {1, 2, 3, 4};
+    Matrix matrix = jordanSymMatrix(values);
     matrix.print();
     return 0;
 }

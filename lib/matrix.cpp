@@ -1,12 +1,11 @@
 #include <iostream>
-#include <vector>
 
 #include "matrix.h"
 
 Matrix::Matrix(
     unsigned nrows,
     unsigned ncols,
-    std::vector<float> values
+    std::vector<double> values
 ):
     nrows(nrows),
     ncols(ncols),
@@ -14,7 +13,7 @@ Matrix::Matrix(
 {};
 
 
-float& Matrix::operator() (unsigned row, unsigned col) {
+double& Matrix::operator() (unsigned row, unsigned col) {
     return values[row * nrows + col];
 }
 
@@ -25,7 +24,8 @@ void Matrix::print()
     {
         for(unsigned col(0); col < ncols; col++)
         {
-            std::cout << values[row * nrows + col] << std::endl;
+            std::cout << values[row * nrows + col] << ' ';
         }
+        std::cout << std::endl;
     };
 };
