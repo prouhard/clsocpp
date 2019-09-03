@@ -14,7 +14,7 @@ class Matrix
         Matrix(
             unsigned nrows,
             unsigned ncols,
-            std::vector<double> values
+            const std::vector<double>& values
         );
         double& operator() (unsigned row, unsigned col);
         void print();

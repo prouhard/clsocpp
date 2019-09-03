@@ -1,4 +1,5 @@
-#include "jordanMatrix.h"
+#include <iostream>
+#include "jordan.h"
 
 
 int main()
