@@ -46,16 +46,28 @@ Vector spectralVector(Vector& xCone, int sgn)
 }
 
 
-Vector firstSpectralVector(Vector& xCone) { return spectralVector(xCone, -1); }
+Vector firstSpectralVector(Vector& xCone)
+{
+    return spectralVector(xCone, -1);
+}
 
 
-Vector secondSpectralVector(Vector& xCone) { return spectralVector(xCone, 1); }
+Vector secondSpectralVector(Vector& xCone)
+{
+    return spectralVector(xCone, 1); 
+}
 
 
-double firstSpectralValue(Vector& xCone) { return xCone[0] - xCone.euclideanNorm(1); }
+double firstSpectralValue(Vector& xCone)
+{
+    return xCone[0] - xCone.euclideanNorm(1);
+}
 
 
-double secondSpectralValue(Vector& xCone) { return xCone[0] + xCone.euclideanNorm(1); }
+double secondSpectralValue(Vector& xCone)
+{
+    return xCone[0] + xCone.euclideanNorm(1);
+}
 
 
 Vector spectralDecomposition(Vector &xCone)

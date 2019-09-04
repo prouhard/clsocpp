@@ -1,7 +1,4 @@
-#include <iostream>
-
 #include "jordan.h"
-#include "vector.h"
 
 
 int main()

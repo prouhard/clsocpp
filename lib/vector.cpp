@@ -48,7 +48,10 @@ double Vector::euclideanNorm(std::size_t startIndex)
 }
 
 
-std::size_t Vector::size(){return values.size();}
+std::size_t Vector::size()
+{
+    return values.size();
+}
 
 
 void Vector::print()
@@ -63,7 +66,15 @@ void Vector::print()
 Vector operator*(double scalar, Vector vector)
 {
     std::vector<double> multipliedVector(vector.length);
-    std::transform(vector.values.begin(), vector.values.end(), multipliedVector.begin(), [scalar](double& c){ return c * scalar; });
+    std::transform(
+        vector.values.begin(),
+        vector.values.end(),
+        multipliedVector.begin(),
+        [scalar](double& c)
+        {
+            return c * scalar;
+        }
+    );
     return Vector(vector.length, multipliedVector);
 }
 

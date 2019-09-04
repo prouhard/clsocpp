@@ -14,7 +14,7 @@ Matrix::Matrix(
 {};
 
 
-double& Matrix::operator() (std::size_t row, std::size_t col)
+double& Matrix::operator()(std::size_t row, std::size_t col)
 {
     return values[row * nrows + col];
 }
