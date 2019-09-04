@@ -2,10 +2,11 @@
 
 #include "matrix.h"
 
+
 Matrix::Matrix(
-    unsigned nrows,
-    unsigned ncols,
-    const std::vector<double>& values
+    std::size_t nrows,
+    std::size_t ncols,
+    std::vector<double>& values
 ):
     nrows { nrows },
     ncols { ncols },
@@ -13,7 +14,8 @@ Matrix::Matrix(
 {};
 
 
-double& Matrix::operator() (unsigned row, unsigned col) {
+double& Matrix::operator() (std::size_t row, std::size_t col)
+{
     return values[row * nrows + col];
 }
 

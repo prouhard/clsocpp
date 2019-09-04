@@ -7,16 +7,16 @@
 class Matrix
 {
     private:
-        unsigned nrows;
-        unsigned ncols;
+        std::size_t nrows;
+        std::size_t ncols;
         std::vector<double> values;
     public:
         Matrix(
-            unsigned nrows,
-            unsigned ncols,
-            const std::vector<double>& values
+            std::size_t nrows,
+            std::size_t ncols,
+            std::vector<double>& values
         );
-        double& operator() (unsigned row, unsigned col);
+        double& operator() (std::size_t row, std::size_t col);
         void print();
 };
 

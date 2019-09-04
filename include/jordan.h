@@ -2,21 +2,22 @@
 #define JORDAN_H
 
 #include "matrix.h"
+#include "vector.h"
 
 
-Matrix jordanSymMatrix(const std::vector<double>& values);
+Matrix jordanSymMatrix(Vector& values);
 
-double euclideanNorm(const std::vector<double>& x, unsigned startIndex=0);
+double euclideanNorm(Vector& x, std::size_t startIndex=0);
 
-double lambda1(const std::vector<double>& x);
+double computeFirstSpectralValue(Vector& x);
 
-double lambda2(const std::vector<double>& x);
+double computeSecondSpectralValue(Vector& x);
 
-std::vector<double> u1(const std::vector<double>& x, int sgn);
+Vector computeSpectralVector(Vector& x, int sgn);
 
-std::vector<double> getU1(const std::vector<double>& x);
+Vector computeFirstSpectralVector(Vector& x);
 
-std::vector<double> getU2(const std::vector<double>& x);
+Vector computeSecondSpectralVector(Vector& x);
 
 
 #endif
