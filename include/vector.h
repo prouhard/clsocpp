@@ -17,13 +17,14 @@ class Vector
         );
         const double& operator[](std::size_t index) const;
         double& operator[](std::size_t index);
+        Vector operator+(Vector vector);
         double euclideanNorm(std::size_t startIndex);
         std::size_t size();
         void print();
 };
 
-Vector operator*(double scalar, Vector& vector);
+Vector operator*(double scalar, Vector vector);
 
-Vector operator*(Vector& vector, double scalar);
+Vector operator*(Vector vector, double scalar);
 
 #endif

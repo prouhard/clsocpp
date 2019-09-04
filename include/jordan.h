@@ -7,15 +7,17 @@
 
 Matrix jordanSymMatrix(Vector& values);
 
-double computeFirstSpectralValue(Vector& x);
+double firstSpectralValue(Vector& x);
 
-double computeSecondSpectralValue(Vector& x);
+double secondSpectralValue(Vector& x);
 
-Vector computeSpectralVector(Vector& x, int sgn);
+Vector spectralVector(Vector& x, int sgn);
 
-Vector computeFirstSpectralVector(Vector& x);
+Vector firstSpectralVector(Vector& x);
 
-Vector computeSecondSpectralVector(Vector& x);
+Vector secondSpectralVector(Vector& x);
+
+Vector spectralDecomposition(Vector& x);
 
 
 #endif

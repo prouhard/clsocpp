@@ -10,7 +10,7 @@ int main()
     Vector vector = Vector(4, values);
     Matrix matrix = jordanSymMatrix(vector);
     matrix.print();
-    Vector firstSpectralVector = computeFirstSpectralVector(vector);
-    firstSpectralVector.print();
+    Vector decomposedVector = spectralDecomposition(vector);
+    decomposedVector.print();
     return 0;
 }

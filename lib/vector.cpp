@@ -26,10 +26,24 @@ double& Vector::operator[](std::size_t index)
 }
 
 
+Vector Vector::operator+(Vector vector)
+{
+    Vector addedVectors = Vector(length, values);
+    for(auto i{0}; i<length; i++)
+    {
+        addedVectors[i] += vector[i];
+    }
+    return addedVectors;
+}
+
+
 double Vector::euclideanNorm(std::size_t startIndex)
 {
     double sumOfSquares = 0;
-    for(auto xi{values.begin()+startIndex}; xi<values.end(); ++xi) sumOfSquares += *xi * *xi;
+    for(auto xi{values.begin()+startIndex}; xi<values.end(); ++xi)
+    {
+        sumOfSquares += *xi * *xi;
+    }
     return std::sqrt(sumOfSquares);
 }
 
@@ -46,7 +60,7 @@ void Vector::print()
 };
 
 
-Vector operator*(double scalar, Vector& vector)
+Vector operator*(double scalar, Vector vector)
 {
     std::vector<double> multipliedVector(vector.length);
     std::transform(vector.values.begin(), vector.values.end(), multipliedVector.begin(), [scalar](double& c){ return c * scalar; });
@@ -54,7 +68,7 @@ Vector operator*(double scalar, Vector& vector)
 }
 
 
-Vector operator*(Vector& vector, double scalar)
+Vector operator*(Vector vector, double scalar)
 {
     return scalar * vector;
 }

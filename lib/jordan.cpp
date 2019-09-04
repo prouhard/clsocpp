@@ -19,7 +19,7 @@ Matrix jordanSymMatrix(Vector& xCone)
 }
 
 
-Vector computeSpectralVector(Vector& xCone, int sgn)
+Vector spectralVector(Vector& xCone, int sgn)
 {
     double euclideanNorm = xCone.euclideanNorm(1);
     auto length = xCone.size();
@@ -46,13 +46,21 @@ Vector computeSpectralVector(Vector& xCone, int sgn)
 }
 
 
-Vector computeFirstSpectralVector(Vector& xCone) { return computeSpectralVector(xCone, -1); }
+Vector firstSpectralVector(Vector& xCone) { return spectralVector(xCone, -1); }
 
 
-Vector computeSecondSpectralVector(Vector& xCone) { return computeSpectralVector(xCone, 1); }
+Vector secondSpectralVector(Vector& xCone) { return spectralVector(xCone, 1); }
 
 
-double computeFirstSpectralValue(Vector& xCone) { return xCone[0] - xCone.euclideanNorm(1); }
+double firstSpectralValue(Vector& xCone) { return xCone[0] - xCone.euclideanNorm(1); }
 
 
-double computeSecondSpectralValue(Vector& xCone) { return xCone[0] + xCone.euclideanNorm(1); }
+double secondSpectralValue(Vector& xCone) { return xCone[0] + xCone.euclideanNorm(1); }
+
+
+Vector spectralDecomposition(Vector &xCone)
+{
+    double lambda1 = firstSpectralValue(xCone);
+    double lambda2 = secondSpectralValue(xCone);
+    return (lambda1 * lambda1) * firstSpectralVector(xCone) + (lambda2 * lambda2) * secondSpectralVector(xCone);
+}
