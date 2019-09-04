@@ -7,8 +7,6 @@
 
 Matrix jordanSymMatrix(Vector& values);
 
-double euclideanNorm(Vector& x, std::size_t startIndex=0);
-
 double computeFirstSpectralValue(Vector& x);
 
 double computeSecondSpectralValue(Vector& x);
