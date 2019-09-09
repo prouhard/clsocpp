@@ -26,10 +26,27 @@ double& Vector::operator[](std::size_t index)
 }
 
 
+Vector Vector::operator()(Vector& indices){
+    std::size_t length { indices.size() };
+    std::vector<double> subVectorValues(length);
+    Vector subVector(indices.size(), subVectorValues);
+    size_t subIndex = 0;
+    for(
+        std::vector<double>::iterator xIndex { indices.values.begin() };
+        xIndex != indices.values.end();
+        ++xIndex, subIndex++
+    )
+    {
+        subVector[subIndex] = values[*xIndex];
+    }
+    return subVector;
+}
+
+
 Vector Vector::operator+(Vector vector)
 {
     Vector addedVectors = Vector(length, values);
-    for(auto i{0}; i<length; i++)
+    for(auto i { 0 }; i != length; i++)
     {
         addedVectors[i] += vector[i];
     }
@@ -37,10 +54,21 @@ Vector Vector::operator+(Vector vector)
 }
 
 
+Vector Vector::operator-(Vector vector)
+{
+    Vector substractedVectors = Vector(length, values);
+    for(auto i { 0 }; i != length; i++)
+    {
+        substractedVectors[i] -= vector[i];
+    }
+    return substractedVectors;
+}
+
+
 double Vector::euclideanNorm(std::size_t startIndex)
 {
-    double sumOfSquares = 0;
-    for(auto xi{values.begin()+startIndex}; xi<values.end(); ++xi)
+    double sumOfSquares { 0 };
+    for(auto xi { values.begin() + startIndex }; xi != values.end(); ++xi)
     {
         sumOfSquares += *xi * *xi;
     }
@@ -51,6 +79,16 @@ double Vector::euclideanNorm(std::size_t startIndex)
 std::size_t Vector::size()
 {
     return values.size();
+}
+
+double Vector::sum()
+{
+    double runningSum { 0 };
+    for (auto element : values)
+    {
+        runningSum += element;
+    }
+    return runningSum;
 }
 
 

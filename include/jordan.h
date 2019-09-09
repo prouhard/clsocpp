@@ -7,17 +7,23 @@
 
 Matrix jordanSymMatrix(Vector& values);
 
-double firstSpectralValue(Vector& x);
+double firstSpectralValue(Vector& xCone);
 
-double secondSpectralValue(Vector& x);
+double secondSpectralValue(Vector& xCone);
 
-Vector spectralVector(Vector& x, int sgn);
+Vector spectralVector(Vector& xCone, int sgn);
 
-Vector firstSpectralVector(Vector& x);
+Vector firstSpectralVector(Vector& xCone);
 
-Vector secondSpectralVector(Vector& x);
+Vector secondSpectralVector(Vector& xCone);
 
-Vector spectralDecomposition(Vector& x);
+Vector spectralDecompositionSquared(Vector& xCone);
+
+Vector spectralDecompositionRoot(Vector& xCone);
+
+Vector jordanIdentity(Vector& kvec);
+
+Vector SmoothedFischerBurmeister(Vector& xCone, Vector& s, Vector& mu, Vector& indices);
 
 
 #endif

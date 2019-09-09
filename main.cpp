@@ -3,11 +3,11 @@
 
 int main()
 {
-    std::vector<double> values = {1, 2, 3, 4};
-    Vector vector = Vector(4, values);
+    std::vector<double> values = {3, 2, 2};
+    Vector vector = Vector(3, values);
     Matrix matrix = jordanSymMatrix(vector);
     matrix.print();
-    Vector decomposedVector = spectralDecomposition(vector);
-    decomposedVector.print();
+    Vector e = jordanIdentity(vector);
+    e.print();
     return 0;
 }
