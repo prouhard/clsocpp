@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 #include "jordan.h"
 
@@ -19,6 +20,20 @@ MatrixXd jordanSymMatrix(const VectorXd& x_cone)
 }
 
 
+VectorXd jordanIdentity(const VectorXd& kvec)
+{
+    std::size_t length = (std::size_t)kvec.sum();
+    VectorXd values = VectorXd::Zero(length);
+    std::size_t current_index { 0 };
+    for (auto i = 0; i != kvec.size(); i++)
+    {
+        values[current_index] = 1;
+        current_index += kvec(i);
+    }
+    return values;
+}
+
+
 double truncatedNorm(VectorXd x, std::size_t from)
 {
     return x.tail(x.size() - from).norm();
@@ -28,7 +43,7 @@ double truncatedNorm(VectorXd x, std::size_t from)
 VectorXd spectralVector(const VectorXd& x_cone, int sgn)
 {
     double euclidean_norm = truncatedNorm(x_cone);
-    auto length { x_cone.size() };
+    auto length = x_cone.size();
     VectorXd values(length);
     if (euclidean_norm < 1e-12)
     {
@@ -93,17 +108,18 @@ VectorXd spectralDecompositionRoot(const VectorXd& x_cone)
 }
 
 
-VectorXd jordanIdentity(const VectorXd& kvec)
+VectorXd phiRootTerm(
+    const Eigen::VectorBlock<const VectorXd>& sliced_x_cone,
+    const Eigen::VectorBlock<const VectorXd>& sliced_s,
+    const double mu_i,
+    const std::size_t current_constraint_length
+)
 {
-    std::size_t length = (std::size_t)kvec.sum();
-    VectorXd values = VectorXd::Zero(length);
-    std::size_t current_index { 0 };
-    for (auto i = 0; i != kvec.size(); i++)
-    {
-        values[current_index] = 1;
-        current_index += kvec(i);
-    }
-    return values;
+    return spectralDecompositionRoot(
+        spectralDecompositionSquared(sliced_x_cone + mu_i * sliced_s)
+        + spectralDecompositionSquared(mu_i * sliced_x_cone + sliced_s)
+        + 2 * (mu_i * mu_i) * jordanIdentity(VectorXd::Constant(1, current_constraint_length))
+    );
 }
 
 
@@ -116,6 +132,7 @@ VectorXd SmoothedFischerBurmeister(
 {
     VectorXd phi(x_cone.size());
     std::size_t current_length = 0;
+    std::size_t current_constraint_length;
     for(
         std::size_t i = 0;
         i != constraints_lengths.size();
@@ -123,32 +140,17 @@ VectorXd SmoothedFischerBurmeister(
         i++
     )
     {
-        auto sliced_x_cone = x_cone.segment(current_length, constraints_lengths[i]);
-        auto sliced_s = s.segment(current_length, constraints_lengths[i]);
-        phi.segment(current_length, constraints_lengths[i]) = 
-            (1 + mu[i]) * (sliced_x_cone + sliced_s)
-          - spectralDecompositionRoot(
-                spectralDecompositionSquared(sliced_x_cone + mu[i] * sliced_s)
-              + spectralDecompositionSquared(mu[i] * sliced_x_cone + sliced_s)
-              + 2 * (mu[i] * mu[i]) * jordanIdentity(VectorXd::Constant(1, constraints_lengths[i]))
-            );
+        current_constraint_length = constraints_lengths[i];
+
+        auto sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
+        auto sliced_s = s.segment(current_length, current_constraint_length);
+        
+        phi.segment(current_length, current_constraint_length) = (1 + mu[i]) * (sliced_x_cone + sliced_s) - phiRootTerm(
+            sliced_x_cone,
+            sliced_s,
+            mu[i],
+            current_constraint_length
+        );
    }
    return phi;
-}
-
-
-VectorXd H(
-    const VectorXd& x_cone,
-    const VectorXd& s,
-    const VectorXd& mu,
-    const MatrixXd& M,
-    const VectorXd& b,
-    const std::vector<std::size_t>& constraints_lengths
-)
-{
-    VectorXd h(M.cols() + M.rows() + constraints_lengths.size());
-    h << b - M * x_cone, SmoothedFischerBurmeister(
-        x_cone, s, mu, constraints_lengths
-    ), mu;
-    return h;
 }

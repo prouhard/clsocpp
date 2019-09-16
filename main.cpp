@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <time.h>
 
-#include "jordan.h"
+#include "optimizer.h"
 
 
 int main()
@@ -17,11 +17,12 @@ int main()
     VectorXd mu(3);
     mu << 0.5, 0.2, 0.3;
 
-    MatrixXd M(4, 5);
-    M << 0.2, 0.3, 0.1, 0.1, 0.4,
-         0.1, 0.4, 0.2, 0.3, 0.2,
-         0.2, 0.1, 0.3, 0.2, 0.4,
-         0.3, 0.2, 0.4, 0.4, 0.1;
+    MatrixXd M(5, 4);
+    M << 0.2, 0.1, 0.2, 0.3,
+         0.3, 0.4, 0.1, 0.2,
+         0.1, 0.2, 0.3, 0.4,
+         0.1, 0.3, 0.2, 0.4,
+         0.4, 0.2, 0.4, 0.1;
 
     VectorXd b(4);
     b << 0.1, 0.1, 0.3, 0.2;
@@ -33,7 +34,7 @@ int main()
 
     for (int i {0}; i != 1000; i++)
     {
-        H(x_cone, s, mu, M, b, constraints_lengths);
+        HDiff(x_cone, s, mu, M, constraints_lengths);
     }
 
     end = clock();
@@ -43,6 +44,8 @@ int main()
     std::cout << "Time taken by program is : " << std::fixed  
          << time_taken << std::setprecision(5); 
     std::cout << " sec " << std::endl;
+
+    std::cout << HDiff(x_cone, s, mu, M, constraints_lengths) << std::endl;
 
     return 0; 
 }
