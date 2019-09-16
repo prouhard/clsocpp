@@ -4,117 +4,136 @@
 #include "jordan.h"
 
 
-Matrix jordanSymMatrix(Vector& xCone)
+MatrixXd jordanSymMatrix(const VectorXd& x_cone)
 {
-    auto nrows { xCone.size() }, ncols { nrows };
-    std::vector<double> values(nrows * ncols);
-    double xCone0 { xCone[0] };
-    values[0] = xCone0;
-    for(auto i{1}; i<nrows; i++)
+    auto nrows { x_cone.size() };
+    MatrixXd values(nrows, nrows);
+    double x_cone0 { x_cone[0] };
+    values(0, 0) = x_cone0;
+    for(auto i = 1; i < nrows; i++)
     {
-        values[i] = values[i * nrows] = xCone[i];
-        values[i * (nrows + 1)] = xCone0;
+        values(0, i) = values(i, 0) = x_cone[i];
+        values(i, i) = x_cone0;
     }
-    return Matrix(nrows, ncols, values);
+    return values;
 }
 
 
-Vector spectralVector(Vector& xCone, int sgn)
+double truncatedNorm(VectorXd x, std::size_t from)
 {
-    double euclideanNorm { xCone.euclideanNorm(1) };
-    auto length { xCone.size() };
-    if (euclideanNorm < 1e-12)
+    return x.tail(x.size() - from).norm();
+}
+
+
+VectorXd spectralVector(const VectorXd& x_cone, int sgn)
+{
+    double euclidean_norm = truncatedNorm(x_cone);
+    auto length { x_cone.size() };
+    VectorXd values(length);
+    if (euclidean_norm < 1e-12)
     {
         if (length > 1)
         {
-            std::vector<double> spectralVector(length, sgn * 0.5 * std::sqrt(1.0 / (length - 1)));
-            spectralVector[0] = 0.5;
-            return Vector(length, spectralVector);
+            auto coefficient = sgn * 0.5 * std::sqrt(1.0 / (length - 1));
+            values << 0.5, VectorXd::Constant(length - 1, coefficient);
+            return values;
         }
         else 
         {
-            std::vector<double> spectralVector{0.5};
-            return Vector(length, spectralVector);
+            return VectorXd::Constant(1, 0.5);
         }
     }
     else 
     {
-        Vector spectralVector { (sgn * 0.5 / euclideanNorm) * xCone };
-        spectralVector[0] = 0.5;
-        return spectralVector;
+        values = (sgn * 0.5 / euclidean_norm) * x_cone;
+        values(0) = 0.5;
+        return values;
     }
 }
 
 
-Vector firstSpectralVector(Vector& xCone)
+VectorXd firstSpectralVector(const VectorXd& x_cone)
 {
-    return spectralVector(xCone, -1);
+    return spectralVector(x_cone, -1);
 }
 
 
-Vector secondSpectralVector(Vector& xCone)
+VectorXd secondSpectralVector(const VectorXd& x_cone)
 {
-    return spectralVector(xCone, 1); 
+    return spectralVector(x_cone, 1); 
 }
 
 
-double firstSpectralValue(Vector& xCone)
+double firstSpectralValue(const VectorXd& x_cone)
 {
-    return xCone[0] - xCone.euclideanNorm(1);
+    return x_cone(0) - truncatedNorm(x_cone);
 }
 
 
-double secondSpectralValue(Vector& xCone)
+double secondSpectralValue(const VectorXd& x_cone)
 {
-    return xCone[0] + xCone.euclideanNorm(1);
+    return x_cone(0) + truncatedNorm(x_cone);
 }
 
 
-Vector spectralDecompositionSquared(Vector& xCone)
+VectorXd spectralDecompositionSquared(const VectorXd& x_cone)
 {
-    double lambda1 { firstSpectralValue(xCone) };
-    double lambda2 { secondSpectralValue(xCone) };
-    return (lambda1 * lambda1) * firstSpectralVector(xCone) + (lambda2 * lambda2) * secondSpectralVector(xCone);
+    double lambda_1 = firstSpectralValue(x_cone);
+    double lambda_2 = secondSpectralValue(x_cone);
+    return (lambda_1 * lambda_1) * firstSpectralVector(x_cone) + (lambda_2 * lambda_2) * secondSpectralVector(x_cone);
 }
 
-Vector spectralDecompositionRoot(Vector& xCone)
+VectorXd spectralDecompositionRoot(const VectorXd& x_cone)
 {
-    double lambda1 { firstSpectralValue(xCone) };
-    double lambda2 { secondSpectralValue(xCone) };
-    return std::sqrt(lambda1) * firstSpectralVector(xCone) + std::sqrt(lambda2) * secondSpectralVector(xCone);
+    
+    double lambda_1 = firstSpectralValue(x_cone);
+    double lambda_2 = secondSpectralValue(x_cone);
+    
+    return std::sqrt(lambda_1) * firstSpectralVector(x_cone) + std::sqrt(lambda_2) * secondSpectralVector(x_cone);
 }
 
 
-Vector jordanIdentity(Vector& kvec)
+VectorXd jordanIdentity(const VectorXd& kvec)
 {
     std::size_t length = (std::size_t)kvec.sum();
-    std::vector<double> _jordanIdentity(length);
-    std::size_t currentIndex { 0 };
-    for (auto index : kvec.values)
+    VectorXd values = VectorXd::Zero(length);
+    std::size_t current_index { 0 };
+    for (auto i = 0; i != kvec.size(); i++)
     {
-        _jordanIdentity[currentIndex] = 1;
-        currentIndex += index;
+        values[current_index] = 1;
+        current_index += kvec(i);
     }
-    return Vector(length, _jordanIdentity);
+    return values;
 }
 
 
-Vector SmoothedFischerBurmeister(Vector& xCone, Vector& s, Vector& mu, std::vector<Vector>& indices)
+VectorXd SmoothedFischerBurmeister(
+    const VectorXd& x_cone,
+    const VectorXd& s,
+    const VectorXd& mu,
+    const std::vector<std::size_t>& constraints_lengths
+)
 {
-    std::size_t length{indices.size()};
-    std::vector<double> values;
-    Vector phi = Vector(length, values);
-    for(std::size_t i{0}; i<length; i++)
+    VectorXd phi(x_cone.size());
+    std::size_t current_length = 0;
+    for(
+        std::size_t i = 0;
+        i != constraints_lengths.size();
+        current_length += constraints_lengths[i],
+        i++
+    )
     {
-        Vector slicedXCone { xCone(indices[i]) };
-        Vector slicedS { s(indices[i]) };
-        Vector smoothedX { slicedXCone + mu[i] * slicedS };
-        Vector smoothedS { mu[i] * slicedXCone + slicedS };
-        std::vector<double> _neutralE(1, indices[i].size());
-        Vector neutralE { Vector(1, _neutralE) };
-        Vector addedSmoothedXS { smoothedX + smoothedS + 2 * (mu[i] * mu[i]) * jordanIdentity(neutralE) };
-
-        phi(indices[i]) = (1 + mu[i]) * (slicedXCone + slicedS) - spectralDecompositionRoot(addedSmoothedXS);
+        auto sliced_x_cone = x_cone.segment(current_length, constraints_lengths[i]);
+        auto sliced_s = s.segment(current_length, constraints_lengths[i]);
+        phi.segment(current_length, constraints_lengths[i]) = 
+            (1 + mu[i]) * (sliced_x_cone + sliced_s)
+          - spectralDecompositionRoot(
+                spectralDecompositionSquared(sliced_x_cone + mu[i] * sliced_s)
+              + spectralDecompositionSquared(mu[i] * sliced_x_cone + sliced_s)
+              + 2 * (mu[i] * mu[i]) * jordanIdentity(
+                  VectorXd::Constant(1, constraints_lengths[i])
+              )
+            );
    }
    return phi;
 }

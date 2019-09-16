@@ -1,29 +1,38 @@
 #ifndef JORDAN_H
 #define JORDAN_H
 
-#include "matrix.h"
-#include "vector.h"
+#include <Eigen/Dense>
 
 
-Matrix jordanSymMatrix(Vector& values);
+using Eigen::MatrixXd, Eigen::VectorXd;
 
-double firstSpectralValue(Vector& xCone);
 
-double secondSpectralValue(Vector& xCone);
+MatrixXd jordanSymMatrix(const VectorXd& values);
 
-Vector spectralVector(Vector& xCone, int sgn);
+double truncatedNorm(VectorXd x, std::size_t from=1);
 
-Vector firstSpectralVector(Vector& xCone);
+double firstSpectralValue(const VectorXd& x_cone);
 
-Vector secondSpectralVector(Vector& xCone);
+double secondSpectralValue(const VectorXd& x_cone);
 
-Vector spectralDecompositionSquared(Vector& xCone);
+VectorXd spectralVector(const VectorXd& x_cone, int sgn);
 
-Vector spectralDecompositionRoot(Vector& xCone);
+VectorXd firstSpectralVector(const VectorXd& x_cone);
 
-Vector jordanIdentity(Vector& kvec);
+VectorXd secondSpectralVector(const VectorXd& x_cone);
 
-Vector SmoothedFischerBurmeister(Vector& xCone, Vector& s, Vector& mu, Vector& indices);
+VectorXd spectralDecompositionSquared(const VectorXd& x_cone);
+
+VectorXd spectralDecompositionRoot(const VectorXd& x_cone);
+
+VectorXd jordanIdentity(const VectorXd& kvec);
+
+VectorXd SmoothedFischerBurmeister(
+    const VectorXd& x_cone,
+    const VectorXd& s,
+    const VectorXd& mu,
+    const std::vector<std::size_t>& indices
+);
 
 
 #endif
