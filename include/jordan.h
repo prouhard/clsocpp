@@ -31,7 +31,16 @@ VectorXd SmoothedFischerBurmeister(
     const VectorXd& x_cone,
     const VectorXd& s,
     const VectorXd& mu,
-    const std::vector<std::size_t>& indices
+    const std::vector<std::size_t>& constraints_lengths
+);
+
+VectorXd H(
+    const VectorXd& x_cone,
+    const VectorXd& s,
+    const VectorXd& mu,
+    const MatrixXd& M,
+    const VectorXd& b,
+    const std::vector<std::size_t>& constraints_lengths
 );
 
 

@@ -6,9 +6,9 @@
 
 MatrixXd jordanSymMatrix(const VectorXd& x_cone)
 {
-    auto nrows { x_cone.size() };
+    auto nrows = x_cone.size();
     MatrixXd values(nrows, nrows);
-    double x_cone0 { x_cone[0] };
+    double x_cone0 = x_cone[0];
     values(0, 0) = x_cone0;
     for(auto i = 1; i < nrows; i++)
     {
@@ -46,7 +46,7 @@ VectorXd spectralVector(const VectorXd& x_cone, int sgn)
     else 
     {
         values = (sgn * 0.5 / euclidean_norm) * x_cone;
-        values(0) = 0.5;
+        values[0] = 0.5;
         return values;
     }
 }
@@ -66,13 +66,13 @@ VectorXd secondSpectralVector(const VectorXd& x_cone)
 
 double firstSpectralValue(const VectorXd& x_cone)
 {
-    return x_cone(0) - truncatedNorm(x_cone);
+    return x_cone[0] - truncatedNorm(x_cone);
 }
 
 
 double secondSpectralValue(const VectorXd& x_cone)
 {
-    return x_cone(0) + truncatedNorm(x_cone);
+    return x_cone[0] + truncatedNorm(x_cone);
 }
 
 
@@ -130,10 +130,25 @@ VectorXd SmoothedFischerBurmeister(
           - spectralDecompositionRoot(
                 spectralDecompositionSquared(sliced_x_cone + mu[i] * sliced_s)
               + spectralDecompositionSquared(mu[i] * sliced_x_cone + sliced_s)
-              + 2 * (mu[i] * mu[i]) * jordanIdentity(
-                  VectorXd::Constant(1, constraints_lengths[i])
-              )
+              + 2 * (mu[i] * mu[i]) * jordanIdentity(VectorXd::Constant(1, constraints_lengths[i]))
             );
    }
    return phi;
+}
+
+
+VectorXd H(
+    const VectorXd& x_cone,
+    const VectorXd& s,
+    const VectorXd& mu,
+    const MatrixXd& M,
+    const VectorXd& b,
+    const std::vector<std::size_t>& constraints_lengths
+)
+{
+    VectorXd h(M.cols() + M.rows() + constraints_lengths.size());
+    h << b - M * x_cone, SmoothedFischerBurmeister(
+        x_cone, s, mu, constraints_lengths
+    ), mu;
+    return h;
 }
