@@ -7,9 +7,9 @@
 
 MatrixXd jordanSymMatrix(const VectorXd& x_cone)
 {
-    auto nrows = x_cone.size();
+    const auto nrows = x_cone.size();
     MatrixXd values(nrows, nrows);
-    double x_cone0 = x_cone[0];
+    double x_cone0 { x_cone[0] };
     values(0, 0) = x_cone0;
     for(auto i = 1; i < nrows; i++)
     {
@@ -22,7 +22,7 @@ MatrixXd jordanSymMatrix(const VectorXd& x_cone)
 
 VectorXd jordanIdentity(const VectorXd& kvec)
 {
-    std::size_t length = (std::size_t)kvec.sum();
+    const std::size_t length { static_cast<std::size_t>(kvec.sum()) };
     VectorXd values = VectorXd::Zero(length);
     std::size_t current_index { 0 };
     for (auto i = 0; i != kvec.size(); i++)
@@ -42,8 +42,8 @@ double truncatedNorm(VectorXd x, std::size_t from)
 
 VectorXd spectralVector(const VectorXd& x_cone, int sgn)
 {
-    double euclidean_norm = truncatedNorm(x_cone);
-    auto length = x_cone.size();
+    const double euclidean_norm { truncatedNorm(x_cone) };
+    const auto length = x_cone.size();
     VectorXd values(length);
     if (euclidean_norm < 1e-12)
     {
@@ -93,17 +93,16 @@ double secondSpectralValue(const VectorXd& x_cone)
 
 VectorXd spectralDecompositionSquared(const VectorXd& x_cone)
 {
-    double lambda_1 = firstSpectralValue(x_cone);
-    double lambda_2 = secondSpectralValue(x_cone);
+    const double lambda_1 { firstSpectralValue(x_cone) };
+    const double lambda_2 { secondSpectralValue(x_cone) };
     return (lambda_1 * lambda_1) * firstSpectralVector(x_cone) + (lambda_2 * lambda_2) * secondSpectralVector(x_cone);
 }
 
 VectorXd spectralDecompositionRoot(const VectorXd& x_cone)
 {
     
-    double lambda_1 = firstSpectralValue(x_cone);
-    double lambda_2 = secondSpectralValue(x_cone);
-    
+    const double lambda_1 { firstSpectralValue(x_cone) };
+    const double lambda_2 { secondSpectralValue(x_cone) };
     return std::sqrt(lambda_1) * firstSpectralVector(x_cone) + std::sqrt(lambda_2) * secondSpectralVector(x_cone);
 }
 
@@ -131,10 +130,10 @@ VectorXd SmoothedFischerBurmeister(
 )
 {
     VectorXd phi(x_cone.size());
-    std::size_t current_length = 0;
+    std::size_t current_length { 0 };
     std::size_t current_constraint_length;
     for(
-        std::size_t i = 0;
+        std::size_t i { 0 };
         i != constraints_lengths.size();
         current_length += constraints_lengths[i],
         i++
@@ -142,8 +141,8 @@ VectorXd SmoothedFischerBurmeister(
     {
         current_constraint_length = constraints_lengths[i];
 
-        auto sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
-        auto sliced_s = s.segment(current_length, current_constraint_length);
+        const auto sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
+        const auto sliced_s = s.segment(current_length, current_constraint_length);
         
         phi.segment(current_length, current_constraint_length) = (1 + mu[i]) * (sliced_x_cone + sliced_s) - phiRootTerm(
             sliced_x_cone,

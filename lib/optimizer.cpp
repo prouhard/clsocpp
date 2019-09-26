@@ -33,7 +33,7 @@ MatrixXd computeBlock(
     auto temp_matrix = mu_i_on_1 ?
         jordanSymMatrix(omega_2_bar) + mu_i * jordanSymMatrix(omega_1_bar)
       : jordanSymMatrix(omega_1_bar) + mu_i * jordanSymMatrix(omega_2_bar);
-    return (1 + mu_i) * MatrixXd::Identity(size, size) - omega_bar_inv * temp_matrix;
+    return (1 + mu_i) * MatrixXd::Identity(size, size) - (omega_bar_inv * temp_matrix).eval();
 }
 
 
@@ -77,8 +77,6 @@ MatrixXd HDiff(
                 current_constraint_length
             )
         ).inverse();
-
-        std::cout << omega_bar_inv << std::endl << std::endl;
 
         M2.block(current_length, current_length, current_constraint_length, current_constraint_length) = computeBlock(
             omega_bar_inv,
