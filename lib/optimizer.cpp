@@ -98,5 +98,11 @@ MatrixXd HDiff(
             )
         );
     }
-    return P;
+
+    h_diff.block(m, 0, k, k) = M2;
+    h_diff.block(m, k, k, m) = - N * M;
+    h_diff.block(m, m + k, k, n) = P;
+    h_diff.block(m + k, m + k, n, n) = MatrixXd::Identity(n, n);
+
+    return h_diff;
 }
