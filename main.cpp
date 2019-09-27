@@ -32,7 +32,9 @@ int main()
     clock_t start, end; 
     start = clock();
 
-    for (int i {0}; i != 1000; i++)
+    constexpr int times { 1000 };
+
+    for (int i {0}; i != times; i++)
     {
         HDiff(x_cone, s, mu, M, constraints_lengths);
     }
@@ -41,8 +43,8 @@ int main()
 
     double time_taken = double(end - start) / double(CLOCKS_PER_SEC); 
 
-    std::cout << "Time taken by program is : " << std::fixed  
-         << time_taken << std::setprecision(5); 
+    std::cout << std::setprecision(10) << "Time taken by one iteration is : " << std::fixed  
+         << time_taken / double(times); 
     std::cout << " sec " << std::endl;
 
     std::cout << HDiff(x_cone, s, mu, M, constraints_lengths) << std::endl;

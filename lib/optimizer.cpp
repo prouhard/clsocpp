@@ -21,22 +21,6 @@ VectorXd H(
 }
 
 
-MatrixXd computeBlock(
-    const MatrixXd& omega_bar_inv,
-    const VectorXd& omega_1_bar,
-    const VectorXd& omega_2_bar,
-    double mu_i,
-    std::size_t size,
-    bool mu_i_on_1
-)
-{
-    auto temp_matrix = mu_i_on_1 ?
-        jordanSymMatrix(omega_2_bar) + mu_i * jordanSymMatrix(omega_1_bar)
-      : jordanSymMatrix(omega_1_bar) + mu_i * jordanSymMatrix(omega_2_bar);
-    return (1 + mu_i) * MatrixXd::Identity(size, size) - (omega_bar_inv * temp_matrix).eval();
-}
-
-
 MatrixXd HDiff(
     const VectorXd& x_cone,
     const VectorXd& s,
@@ -45,9 +29,9 @@ MatrixXd HDiff(
     const std::vector<std::size_t>& constraints_lengths
 )
 {
-    auto k = M.rows();
-    auto m = M.cols();
-    auto n = constraints_lengths.size();
+    const auto k = M.rows();
+    const auto m = M.cols();
+    const auto n = constraints_lengths.size();
     MatrixXd h_diff(m + k + n, m + k + n);
     MatrixXd N = MatrixXd::Zero(k, k);
     MatrixXd M2 = MatrixXd::Zero(k, k);
@@ -63,13 +47,20 @@ MatrixXd HDiff(
     )
     {
         current_constraint_length = constraints_lengths[i];
+
         auto mu_i = mu[i];
-        auto sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
-        auto sliced_s = s.segment(current_length, current_constraint_length);
-        auto omega_1_bar = sliced_x_cone + mu_i * sliced_s;
-        auto omega_2_bar = sliced_x_cone * mu_i + sliced_s;
+
+        const VectorBlock sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
+        const VectorBlock sliced_s = s.segment(current_length, current_constraint_length);
+
+        const VectorXd omega_1_bar = sliced_x_cone + mu_i * sliced_s;
+        const VectorXd omega_2_bar = sliced_x_cone * mu_i + sliced_s;
         
-        auto omega_bar_inv = jordanSymMatrix(
+
+        const MatrixXd jordan_sym_omega_1_bar = jordanSymMatrix(omega_1_bar);
+        const MatrixXd jordan_sym_omega_2_bar = jordanSymMatrix(omega_2_bar);
+
+        const MatrixXd omega_bar_inv = jordanSymMatrix(
             phiRootTerm(
                 sliced_x_cone,
                 sliced_s,
@@ -78,14 +69,34 @@ MatrixXd HDiff(
             )
         ).inverse();
 
-        M2.block(current_length, current_length, current_constraint_length, current_constraint_length) = computeBlock(
-            omega_bar_inv,
-            omega_1_bar,
-            omega_2_bar,
-            mu_i,
+        const MatrixXd mu_i_identity = (1 + mu_i) * MatrixXd::Identity(current_constraint_length, current_constraint_length);
+        
+        N.block(
+            current_length,
+            current_length,
             current_constraint_length,
-            false
+            current_constraint_length
+        ) = mu_i_identity - (omega_bar_inv * (mu_i * jordan_sym_omega_1_bar + jordan_sym_omega_2_bar));
+
+        M2.block(
+            current_length,
+            current_length,
+            current_constraint_length,
+            current_constraint_length
+        ) =  mu_i_identity - (omega_bar_inv * (jordan_sym_omega_1_bar + mu_i * jordan_sym_omega_2_bar));
+
+        P.block(
+            current_length,
+            i,
+            current_constraint_length,
+            1
+        ) = sliced_x_cone + sliced_s - omega_bar_inv * (
+            jordan_sym_omega_1_bar * sliced_s
+          + jordan_sym_omega_2_bar * (
+              sliced_x_cone
+            + 2 * mu_i * jordanIdentity(VectorXd::Constant(1, current_constraint_length))
+            )
         );
     }
-    return M2;
+    return P;
 }

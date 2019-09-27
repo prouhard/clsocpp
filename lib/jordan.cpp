@@ -141,8 +141,8 @@ VectorXd SmoothedFischerBurmeister(
     {
         current_constraint_length = constraints_lengths[i];
 
-        const auto sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
-        const auto sliced_s = s.segment(current_length, current_constraint_length);
+        const VectorBlock sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
+        const VectorBlock sliced_s = s.segment(current_length, current_constraint_length);
         
         phi.segment(current_length, current_constraint_length) = (1 + mu[i]) * (sliced_x_cone + sliced_s) - phiRootTerm(
             sliced_x_cone,

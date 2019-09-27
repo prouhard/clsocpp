@@ -1,20 +1,14 @@
 #ifndef OPTIMIZER_H
 #define OPTIMIZER_H
 
+#include <vector>
 #include <Eigen/Dense>
 
 
-using Eigen::MatrixXd, Eigen::VectorXd;
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+using VectorBlock = Eigen::VectorBlock<const Eigen::VectorXd>;
 
-
-MatrixXd computeBlock(
-    const MatrixXd& omega_bar_inv,
-    const VectorXd& omega_1_bar,
-    const VectorXd& omega_2_bar,
-    double mu_i,
-    std::size_t size,
-    bool mu_i_on_1
-);
 
 VectorXd H(
     const VectorXd& x_cone,

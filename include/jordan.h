@@ -1,10 +1,13 @@
 #ifndef JORDAN_H
 #define JORDAN_H
 
+#include <vector>
 #include <Eigen/Dense>
 
 
-using Eigen::MatrixXd, Eigen::VectorXd;
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+using VectorBlock = Eigen::VectorBlock<const Eigen::VectorXd>;
 
 
 MatrixXd jordanSymMatrix(const VectorXd& values);
