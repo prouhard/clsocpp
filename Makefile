@@ -1,2 +1,2 @@
 run:
-	clang++ -std=c++17 -march=native -Iinclude/ main.cpp lib/* -o main && ./main
+	g++ -std=c++11 -O3 -march=native -Iinclude/ main.cpp lib/* -o main && ./main
