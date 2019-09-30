@@ -20,20 +20,6 @@ MatrixXd jordanSymMatrix(const VectorXd& x_cone)
 }
 
 
-VectorXd jordanIdentity(const VectorXd& kvec)
-{
-    const std::size_t length { static_cast<std::size_t>(kvec.sum()) };
-    VectorXd values = VectorXd::Zero(length);
-    std::size_t current_index { 0 };
-    for (auto i = 0; i != kvec.size(); i++)
-    {
-        values[current_index] = 1;
-        current_index += kvec(i);
-    }
-    return values;
-}
-
-
 double truncatedNorm(VectorXd x, std::size_t from)
 {
     return x.tail(x.size() - from).norm();
