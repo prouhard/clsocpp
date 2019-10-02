@@ -55,52 +55,66 @@ MatrixXd HDiff(
 
         auto mu_i = mu[i];
 
-        const VectorBlock sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
-        const VectorBlock sliced_s = s.segment(current_length, current_constraint_length);
+        if (current_constraint_length == 1)
+        {
+            double x_i = x_cone[i];
+            double s_i = s[i];
+            double omega_1_bar_i = x_i + mu_i * s_i;
+            double omega_2_bar_i = x_i * mu_i + s_i;
+            double omega_bar_inv_i = 1 / std::sqrt(omega_1_bar_i * omega_1_bar_i + omega_2_bar_i * omega_2_bar_i + 2 * mu_i * mu_i);
+            N(current_length, current_length) = (1 + mu_i) - (omega_bar_inv_i * (mu_i * omega_1_bar_i + omega_2_bar_i));
+            M2(current_length, current_length) = (1 + mu_i) - (omega_bar_inv_i * (mu_i * omega_2_bar_i + omega_1_bar_i));
+            P(current_length, i) = x_i + s_i - omega_bar_inv_i * (omega_1_bar_i * s_i + omega_2_bar_i * (x_i + 2 * mu_i));
+        }
+        else
+        {
+            const VectorBlock sliced_x_cone = x_cone.segment(current_length, current_constraint_length);
+            const VectorBlock sliced_s = s.segment(current_length, current_constraint_length);
 
-        const VectorXd omega_1_bar = sliced_x_cone + mu_i * sliced_s;
-        const VectorXd omega_2_bar = sliced_x_cone * mu_i + sliced_s;
-        
-        const MatrixXd jordan_sym_omega_1_bar = jordanSymMatrix(omega_1_bar);
-        const MatrixXd jordan_sym_omega_2_bar = jordanSymMatrix(omega_2_bar);
+            const VectorXd omega_1_bar = sliced_x_cone + mu_i * sliced_s;
+            const VectorXd omega_2_bar = sliced_x_cone * mu_i + sliced_s;
+            
+            const MatrixXd jordan_sym_omega_1_bar = jordanSymMatrix(omega_1_bar);
+            const MatrixXd jordan_sym_omega_2_bar = jordanSymMatrix(omega_2_bar);
 
-        const MatrixXd omega_bar_inv = jordanSymMatrix(
-            phiRootTerm(
-                sliced_x_cone,
-                sliced_s,
-                mu_i,
+            const MatrixXd omega_bar_inv = jordanSymMatrix(
+                phiRootTerm(
+                    sliced_x_cone,
+                    sliced_s,
+                    mu_i,
+                    current_constraint_length
+                )
+            ).inverse();
+
+            const MatrixXd mu_i_identity = (1 + mu_i) * MatrixXd::Identity(current_constraint_length, current_constraint_length);
+            
+            N.block(
+                current_length,
+                current_length,
+                current_constraint_length,
                 current_constraint_length
-            )
-        ).inverse();
+            ) = mu_i_identity - (omega_bar_inv * (mu_i * jordan_sym_omega_1_bar + jordan_sym_omega_2_bar));
 
-        const MatrixXd mu_i_identity = (1 + mu_i) * MatrixXd::Identity(current_constraint_length, current_constraint_length);
-        
-        N.block(
-            current_length,
-            current_length,
-            current_constraint_length,
-            current_constraint_length
-        ) = mu_i_identity - (omega_bar_inv * (mu_i * jordan_sym_omega_1_bar + jordan_sym_omega_2_bar));
+            M2.block(
+                current_length,
+                current_length,
+                current_constraint_length,
+                current_constraint_length
+            ) =  mu_i_identity - (omega_bar_inv * (jordan_sym_omega_1_bar + mu_i * jordan_sym_omega_2_bar));
 
-        M2.block(
-            current_length,
-            current_length,
-            current_constraint_length,
-            current_constraint_length
-        ) =  mu_i_identity - (omega_bar_inv * (jordan_sym_omega_1_bar + mu_i * jordan_sym_omega_2_bar));
-
-        P.block(
-            current_length,
-            i,
-            current_constraint_length,
-            1
-        ) = sliced_x_cone + sliced_s - omega_bar_inv * (
-            jordan_sym_omega_1_bar * sliced_s
-          + jordan_sym_omega_2_bar * (
-              sliced_x_cone
-            + 2 * mu_i * jordanIdentity(VectorXd::Constant(1, current_constraint_length))
-            )
-        );
+            P.block(
+                current_length,
+                i,
+                current_constraint_length,
+                1
+            ) = sliced_x_cone + sliced_s - omega_bar_inv * (
+                jordan_sym_omega_1_bar * sliced_s
+            + jordan_sym_omega_2_bar * (
+                sliced_x_cone
+                + 2 * mu_i * jordanIdentity(VectorXd::Constant(1, current_constraint_length))
+                )
+            );
+        }        
     }
 
     h_diff.block(m, 0, k, k) = M2;
