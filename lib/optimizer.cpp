@@ -169,7 +169,7 @@ VectorXd Solve(
         // TODO : handle non invertible matrices
         VectorXd delta_z = delta_lk * HDiff(
             x_cone, s, mu, M, constraints_lengths
-        ).colPivHouseholderQr().solve(
+        ).partialPivLu().solve(
             rho * z_bar - h_vector
         );
 
