@@ -4,6 +4,11 @@
 #include <iostream>
 
 
+double Rho(double gamma, double norm_h)
+{
+    return gamma * norm_h * std::min(1., norm_h);
+}
+
 VectorXd H(
     const VectorXd& x_cone,
     const VectorXd& s,
@@ -14,7 +19,7 @@ VectorXd H(
 )
 {
     VectorXd h(M.cols() + M.rows() + constraints_lengths.size());
-    h << b - M * x_cone, SmoothedFischerBurmeister(
+    h << b - M.transpose() * x_cone, SmoothedFischerBurmeister(
         x_cone, s, mu, constraints_lengths
     ), mu;
     return h;
@@ -32,11 +37,11 @@ MatrixXd HDiff(
     const auto k = M.rows();
     const auto m = M.cols();
     const auto n = constraints_lengths.size();
-    MatrixXd h_diff(m + k + n, m + k + n);
+    MatrixXd h_diff = MatrixXd::Zero(m + k + n, m + k + n);
     MatrixXd N = MatrixXd::Zero(k, k);
     MatrixXd M2 = MatrixXd::Zero(k, k);
     MatrixXd P = MatrixXd::Zero(k, n);
-    h_diff.block(0, 0, k, m) = - M;
+    h_diff.block(0, 0, m, k) = - M.transpose();
     std::size_t current_length = 0;
     std::size_t current_constraint_length;
     for(
@@ -56,7 +61,6 @@ MatrixXd HDiff(
         const VectorXd omega_1_bar = sliced_x_cone + mu_i * sliced_s;
         const VectorXd omega_2_bar = sliced_x_cone * mu_i + sliced_s;
         
-
         const MatrixXd jordan_sym_omega_1_bar = jordanSymMatrix(omega_1_bar);
         const MatrixXd jordan_sym_omega_2_bar = jordanSymMatrix(omega_2_bar);
 
@@ -106,3 +110,111 @@ MatrixXd HDiff(
 
     return h_diff;
 }
+
+
+VectorXd Solve(
+    const MatrixXd& M,
+    const VectorXd& b,
+    const VectorXd& c,
+    const std::vector<std::size_t>& constraints_lengths,
+    const double gamma_fac,
+    const double delta_0,
+    const double sigma_0,
+    const double mu_0,
+    const double zero_tol,
+    const double max_iter,
+    const double min_progress
+)
+{
+    int code { -1 };
+    const std::size_t k = M.rows();
+    const std::size_t m = M.cols();
+    const std::size_t n = constraints_lengths.size();
+    double delta { delta_0 };
+    double sigma { delta_0 };
+    VectorXd mu = mu_0 * VectorXd::Ones(n);
+    VectorXd z_bar(m + k + n);
+    z_bar << VectorXd::Zero(m + k), mu;
+    VectorXd x_cone = jordanIdentity(constraints_lengths);
+    VectorXd y = VectorXd::Zero(m);
+    VectorXd s = c - (M * y).eval();
+    VectorXd h_vector = H(x_cone, s, mu, M, b, constraints_lengths);
+    double norm_H { h_vector.norm() };
+    double old_norm_H { norm_H + 10 * min_progress };
+    double gamma { gamma_fac * std::min(1., 1 / norm_H) };
+    int iteration { 0 }, last_lk { 0 };
+    while (true) {
+        if (norm_H < zero_tol)
+        {
+            code = 0;
+            break;
+        }
+        else if (old_norm_H - norm_H < min_progress)
+        {
+            code = 2;
+            std::cout << "Minimum progress not achieved" << std::endl;
+            break;
+        }
+        else if (iteration >= max_iter)
+        {
+            code = 3;
+            std::cout << "Maximum number of iterations reached" << std::endl;
+            break;
+        }
+        
+        double rho = Rho(gamma, norm_H);
+        int lk { last_lk };
+        double delta_lk { std::pow(delta, lk) };
+
+        // TODO : handle non invertible matrices
+        VectorXd delta_z = delta_lk * HDiff(
+            x_cone, s, mu, M, constraints_lengths
+        ).colPivHouseholderQr().solve(
+            rho * z_bar - h_vector
+        );
+
+        VectorXd newx = x_cone + delta_z.segment(0, k);
+        VectorXd newy = y + delta_z.segment(k, m);
+        VectorXd newmu = mu + delta_z.segment(k + m, n);
+        VectorXd news = c - (M * newy).eval();
+        VectorXd newH = H(newx, news, newmu, M, b, constraints_lengths);
+        double newnorm_H = newH.norm();
+        bool oldsign = newnorm_H <= (1 - sigma * (1 - gamma * mu_0) * delta_lk) * norm_H;
+        bool done = false;
+        while (!done)
+        {
+            if (oldsign)
+            {
+                if (lk == 0) break;
+                lk -= 1;
+                delta_z /= delta;
+            }
+            else 
+            {
+                lk += 1;
+                delta_z *= delta;
+            }
+            delta_lk = std::pow(delta, lk);
+            newx = x_cone + delta_z.segment(0, k);
+            newy = y + delta_z.segment(k, m);
+            newmu = mu + delta_z.segment(k + m, n);
+            news = c - (M * newy).eval();
+            newH = H(newx, news, newmu, M, b, constraints_lengths);
+            newnorm_H = newH.norm();
+            bool sign = newnorm_H <= (1 - sigma * (1 - gamma * mu_0) * delta_lk) * norm_H;
+            if (sign && !oldsign) done = true;
+            oldsign = sign;
+        }
+        last_lk = std::max(lk - 1, 0);
+        x_cone = newx;
+        y = newy;
+        mu = newmu;
+        s = news;
+        h_vector = newH;
+        old_norm_H = norm_H;
+        norm_H = newnorm_H;
+        iteration += 1;
+    }
+    return y;
+}
+ 

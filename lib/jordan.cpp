@@ -8,27 +8,13 @@
 MatrixXd jordanSymMatrix(const VectorXd& x_cone)
 {
     const auto nrows = x_cone.size();
-    MatrixXd values(nrows, nrows);
+    MatrixXd values = MatrixXd::Zero(nrows, nrows);
     double x_cone0 { x_cone[0] };
     values(0, 0) = x_cone0;
     for(auto i = 1; i < nrows; i++)
     {
         values(0, i) = values(i, 0) = x_cone[i];
         values(i, i) = x_cone0;
-    }
-    return values;
-}
-
-
-VectorXd jordanIdentity(const VectorXd& kvec)
-{
-    const std::size_t length { static_cast<std::size_t>(kvec.sum()) };
-    VectorXd values = VectorXd::Zero(length);
-    std::size_t current_index { 0 };
-    for (auto i = 0; i != kvec.size(); i++)
-    {
-        values[current_index] = 1;
-        current_index += kvec(i);
     }
     return values;
 }
@@ -129,7 +115,7 @@ VectorXd SmoothedFischerBurmeister(
     const std::vector<std::size_t>& constraints_lengths
 )
 {
-    VectorXd phi(x_cone.size());
+    VectorXd phi = VectorXd::Zero(x_cone.size());
     std::size_t current_length { 0 };
     std::size_t current_constraint_length;
     for(

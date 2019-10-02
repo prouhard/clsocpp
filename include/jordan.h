@@ -12,7 +12,24 @@ using VectorBlock = Eigen::VectorBlock<const Eigen::VectorXd>;
 
 MatrixXd jordanSymMatrix(const VectorXd& values);
 
-VectorXd jordanIdentity(const VectorXd& kvec);
+template<class T>
+VectorXd jordanIdentity(const T& kvec)
+{
+    double _sum { 0 };
+    for (auto i { 0 }; i != kvec.size(); i++)
+    {
+        _sum += kvec[i];
+    }
+    const std::size_t length { static_cast<std::size_t>(_sum) };
+    VectorXd values = VectorXd::Zero(length);
+    std::size_t current_index { 0 };
+    for (auto i { 0 }; i != kvec.size(); i++)
+    {
+        values[current_index] = 1;
+        current_index += kvec[i];
+    }
+    return values;
+}
 
 double truncatedNorm(VectorXd x, std::size_t from=1);
 
