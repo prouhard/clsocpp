@@ -37,11 +37,11 @@ MatrixXd HDiff(
     const auto k = M.rows();
     const auto m = M.cols();
     const auto n = constraints_lengths.size();
-    MatrixXd h_diff(m + k + n, m + k + n);
+    MatrixXd h_diff = MatrixXd::Zero(m + k + n, m + k + n);
     MatrixXd N = MatrixXd::Zero(k, k);
     MatrixXd M2 = MatrixXd::Zero(k, k);
     MatrixXd P = MatrixXd::Zero(k, n);
-    h_diff.block(0, 0, k, m) = - M;
+    h_diff.block(0, 0, m, k) = - M.transpose();
     std::size_t current_length = 0;
     std::size_t current_constraint_length;
     for(
@@ -162,24 +162,24 @@ VectorXd Solve(
             break;
         }
         
-        double rho = Rho(norm_H, gamma);
+        double rho = Rho(gamma, norm_H);
+        int lk { last_lk };
+        double delta_lk { std::pow(delta, lk) };
+
         // TODO : handle non invertible matrices
-        VectorXd delta_z = HDiff(
+        VectorXd delta_z = delta_lk * HDiff(
             x_cone, s, mu, M, constraints_lengths
         ).colPivHouseholderQr().solve(
             rho * z_bar - h_vector
         );
 
-        return delta_z;
-        
-        int lk { last_lk };
-        VectorXd newx = x_cone + std::pow(delta, lk) * delta_z.segment(0, k);
-        VectorXd newy = y + std::pow(delta, lk) * delta_z.segment(k, m);
-        VectorXd newmu = mu + std::pow(delta, lk) * delta_z.segment(k + m, n);
+        VectorXd newx = x_cone + delta_z.segment(0, k);
+        VectorXd newy = y + delta_z.segment(k, m);
+        VectorXd newmu = mu + delta_z.segment(k + m, n);
         VectorXd news = c - (M * newy).eval();
         VectorXd newH = H(newx, news, newmu, M, b, constraints_lengths);
         double newnorm_H = newH.norm();
-        bool oldsign = newnorm_H <= (1 - sigma * (1 - gamma * mu_0) * std::pow(delta, lk)) * norm_H;
+        bool oldsign = newnorm_H <= (1 - sigma * (1 - gamma * mu_0) * delta_lk) * norm_H;
         bool done = false;
         while (!done)
         {
@@ -187,15 +187,21 @@ VectorXd Solve(
             {
                 if (lk == 0) break;
                 lk -= 1;
+                delta_z /= delta;
             }
-            else lk += 1;
-            newx = x_cone + std::pow(delta, lk) * delta_z.segment(0, k);
-            newy = y + std::pow(delta, lk) * delta_z.segment(k, m);
-            newmu = mu + std::pow(delta, lk) * delta_z.segment(k + m, n);
+            else 
+            {
+                lk += 1;
+                delta_z *= delta;
+            }
+            delta_lk = std::pow(delta, lk);
+            newx = x_cone + delta_z.segment(0, k);
+            newy = y + delta_z.segment(k, m);
+            newmu = mu + delta_z.segment(k + m, n);
             news = c - (M * newy).eval();
             newH = H(newx, news, newmu, M, b, constraints_lengths);
             newnorm_H = newH.norm();
-            bool sign = newnorm_H <= (1 - sigma * (1 - gamma * mu_0) * std::pow(delta, lk)) * norm_H;
+            bool sign = newnorm_H <= (1 - sigma * (1 - gamma * mu_0) * delta_lk) * norm_H;
             if (sign && !oldsign) done = true;
             oldsign = sign;
         }
@@ -208,7 +214,6 @@ VectorXd Solve(
         old_norm_H = norm_H;
         norm_H = newnorm_H;
         iteration += 1;
-        std::cout << iteration << std::endl;
     }
     return y;
 }

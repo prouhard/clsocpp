@@ -8,7 +8,7 @@
 MatrixXd jordanSymMatrix(const VectorXd& x_cone)
 {
     const auto nrows = x_cone.size();
-    MatrixXd values(nrows, nrows);
+    MatrixXd values = MatrixXd::Zero(nrows, nrows);
     double x_cone0 { x_cone[0] };
     values(0, 0) = x_cone0;
     for(auto i = 1; i < nrows; i++)
@@ -115,7 +115,7 @@ VectorXd SmoothedFischerBurmeister(
     const std::vector<std::size_t>& constraints_lengths
 )
 {
-    VectorXd phi(x_cone.size());
+    VectorXd phi = VectorXd::Zero(x_cone.size());
     std::size_t current_length { 0 };
     std::size_t current_constraint_length;
     for(
