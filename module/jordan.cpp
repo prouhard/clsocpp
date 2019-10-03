@@ -1,8 +1,7 @@
+#include "jordan.h"
+
 #include <algorithm>
 #include <cmath>
-#include <iostream>
-
-#include "jordan.h"
 
 
 MatrixXd jordanSymMatrix(const VectorXd& x_cone)
@@ -112,7 +111,7 @@ VectorXd SmoothedFischerBurmeister(
     const VectorXd& x_cone,
     const VectorXd& s,
     const VectorXd& mu,
-    const std::vector<std::size_t>& constraints_lengths
+    const VectorXi& constraints_lengths
 )
 {
     VectorXd phi = VectorXd::Zero(x_cone.size());

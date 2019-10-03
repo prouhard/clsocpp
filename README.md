@@ -1,1 +1,1 @@
-### [Work in progress] Implementation of the CLSOCP solver in C++
+### [Work in progress] Implementation of a SOCP solver in C++ as a Python module

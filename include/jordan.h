@@ -7,6 +7,7 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using Eigen::VectorXi;
 using VectorBlock = Eigen::VectorBlock<const Eigen::VectorXd>;
 
 
@@ -58,7 +59,7 @@ VectorXd SmoothedFischerBurmeister(
     const VectorXd& x_cone,
     const VectorXd& s,
     const VectorXd& mu,
-    const std::vector<std::size_t>& constraints_lengths
+    const VectorXi& constraints_lengths
 );
 
 

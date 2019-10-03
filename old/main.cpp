@@ -14,7 +14,7 @@ int main()
     VectorXd b = getB();
     VectorXd c = getC();
     MatrixXd M = getM();
-    std::vector<std::size_t> constraints_lengths = getConstraintsLengths();
+    VectorXi constraints_lengths = getConstraintsLengths();
 
     clock_t start, end; 
     start = clock();

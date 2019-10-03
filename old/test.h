@@ -7,13 +7,14 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using Eigen::VectorXi;
 
 
 VectorXd getB();
 
 VectorXd getC();
 
-std::vector<std::size_t> getConstraintsLengths();
+VectorXi getConstraintsLengths();
 
 MatrixXd getM();
 

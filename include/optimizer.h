@@ -7,6 +7,7 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using Eigen::VectorXi;
 using VectorBlock = Eigen::VectorBlock<const Eigen::VectorXd>;
 
 
@@ -18,7 +19,7 @@ VectorXd H(
     const VectorXd& mu,
     const MatrixXd& M,
     const VectorXd& b,
-    const std::vector<std::size_t>& constraints_lengths
+    const VectorXi& constraints_lengths
 );
 
 MatrixXd HDiff(
@@ -26,7 +27,7 @@ MatrixXd HDiff(
     const VectorXd& s,
     const VectorXd& mu,
     const MatrixXd& M,
-    const std::vector<std::size_t>& constraints_lengths
+    const VectorXi& constraints_lengths
 );
 
 struct OptimizationResult
@@ -41,7 +42,7 @@ VectorXd Solve(
     const MatrixXd& M,
     const VectorXd& b,
     const VectorXd& c,
-    const std::vector<std::size_t>& constraints_lengths,
+    const VectorXi& constraints_lengths,
     const double gamma_fac=0.95,
     const double delta0=0.75,
     const double sigma0=0.25,

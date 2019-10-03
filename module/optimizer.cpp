@@ -15,7 +15,7 @@ VectorXd H(
     const VectorXd& mu,
     const MatrixXd& M,
     const VectorXd& b,
-    const std::vector<std::size_t>& constraints_lengths
+    const VectorXi& constraints_lengths
 )
 {
     VectorXd h(M.cols() + M.rows() + constraints_lengths.size());
@@ -31,7 +31,7 @@ MatrixXd HDiff(
     const VectorXd& s,
     const VectorXd& mu,
     const MatrixXd& M,
-    const std::vector<std::size_t>& constraints_lengths
+    const VectorXi& constraints_lengths
 )
 {
     const auto k = M.rows();
@@ -130,7 +130,7 @@ VectorXd Solve(
     const MatrixXd& M,
     const VectorXd& b,
     const VectorXd& c,
-    const std::vector<std::size_t>& constraints_lengths,
+    const VectorXi& constraints_lengths,
     const double gamma_fac,
     const double delta_0,
     const double sigma_0,

@@ -136,9 +136,9 @@ VectorXd getC()
 }
 
 
-std::vector<std::size_t> getConstraintsLengths()
+VectorXi getConstraintsLengths()
 {
-    std::vector<std::size_t> constraints_lengths = {
+    VectorXi constraints_lengths = {
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 19, 19
     };
     return constraints_lengths; 
