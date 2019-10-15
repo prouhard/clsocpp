@@ -138,9 +138,8 @@ VectorXd getC()
 
 VectorXi getConstraintsLengths()
 {
-    VectorXi constraints_lengths = {
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 19, 19
-    };
+    VectorXi constraints_lengths(40);
+    constraints_lengths << 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 19, 19;
     return constraints_lengths; 
 }
 

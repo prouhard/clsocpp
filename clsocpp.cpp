@@ -5,7 +5,7 @@
 #include <pybind11/eigen.h>
 
 
-PYBIND11_MODULE(solver, m) {
+PYBIND11_MODULE(clsocpp, m) {
     m.doc() = "CLSOCPP solver.";
 
     m.def(
