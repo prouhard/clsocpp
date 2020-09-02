@@ -19,7 +19,7 @@ int main()
     clock_t start, end; 
     start = clock();
 
-    constexpr int times { 1000 };
+    constexpr int times { 10 };
 
     for (int i {0}; i != times; i++)
     {

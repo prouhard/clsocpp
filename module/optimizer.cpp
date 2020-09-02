@@ -191,6 +191,7 @@ VectorXd Solve(
         double newnorm_H = newH.norm();
         bool oldsign = newnorm_H <= (1 - sigma * (1 - gamma * mu_0) * delta_lk) * norm_H;
         bool done = false;
+        int sub_iteration { 0 };
         while (!done)
         {
             if (oldsign)
@@ -204,6 +205,10 @@ VectorXd Solve(
                 lk += 1;
                 delta_z *= delta;
             }
+            if (sub_iteration >= max_iter) {
+                std::cout << "Maximum number of (sub)iterations reached" << std::endl;
+                break;
+            }
             delta_lk = std::pow(delta, lk);
             newx = x_cone + delta_z.segment(0, k);
             newy = y + delta_z.segment(k, m);
@@ -214,6 +219,7 @@ VectorXd Solve(
             bool sign = newnorm_H <= (1 - sigma * (1 - gamma * mu_0) * delta_lk) * norm_H;
             if (sign && !oldsign) done = true;
             oldsign = sign;
+            sub_iteration += 1;
         }
         last_lk = std::max(lk - 1, 0);
         x_cone = newx;
@@ -225,6 +231,6 @@ VectorXd Solve(
         norm_H = newnorm_H;
         iteration += 1;
     }
-    return y;
+    return x_cone;
 }
  

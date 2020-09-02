@@ -9,7 +9,7 @@ PYBIND11_MODULE(clsocpp, m) {
     m.doc() = "CLSOCPP solver.";
 
     m.def(
-        "Solve",
+        "solve",
         &Solve,
         pybind11::arg("M"),
         pybind11::arg("b"),
