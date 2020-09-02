@@ -45,7 +45,7 @@ MatrixXd HDiff(
     std::size_t current_length = 0;
     std::size_t current_constraint_length;
     for(
-        std::size_t i = 0;
+        long int i = 0;
         i != constraints_lengths.size();
         current_length += constraints_lengths[i],
         i++
@@ -140,7 +140,6 @@ VectorXd Solve(
     const double min_progress
 )
 {
-    int code { -1 };
     const std::size_t k = M.rows();
     const std::size_t m = M.cols();
     const std::size_t n = constraints_lengths.size();
@@ -160,18 +159,15 @@ VectorXd Solve(
     while (true) {
         if (norm_H < zero_tol)
         {
-            code = 0;
             break;
         }
         else if (old_norm_H - norm_H < min_progress)
         {
-            code = 2;
             std::cout << "Minimum progress not achieved" << std::endl;
             break;
         }
         else if (iteration >= max_iter)
         {
-            code = 3;
             std::cout << "Maximum number of iterations reached" << std::endl;
             break;
         }

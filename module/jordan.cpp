@@ -118,7 +118,7 @@ VectorXd SmoothedFischerBurmeister(
     std::size_t current_length { 0 };
     std::size_t current_constraint_length;
     for(
-        std::size_t i { 0 };
+        long int i { 0 };
         i != constraints_lengths.size();
         current_length += constraints_lengths[i],
         i++
